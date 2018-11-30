@@ -16,6 +16,8 @@ function fetchBooks(){
     .then(response => response.json())
 }
 
+let likeButtonText = true;
+
 function renderBooks(data){
   let list = getBookList();
   data.forEach(book => {
@@ -44,17 +46,29 @@ function getBook(event, book){
     bookUsers.appendChild(userItem);
   })
   likeButton = document.createElement('button');
-  likeButton.addEventListener('click', (event) => likeBook(event, book));
-  likeButton.innerText = 'Like this Book!';
+  likeButton.addEventListener('click', (event) => { likeOrDislikeBook(event, book)
+  likeButtonText = !likeButtonText;
+  });
+  if (likeButtonText === true){
+    likeButton.innerText = 'Like this Book!';
+  } else if (likeButtonText === false){
+    likeButton.innerText = 'Dislike';
+  }
   showPanel.append(bookImage, bookDesc, usersHeader, bookUsers, likeButton);
 }
 
-function likeBook(event, book){
+function likeOrDislikeBook(event, book){
   bookId = Number(book.id);
   newUser = {"id": 1, "username": "pouros"}
+  if (likeButtonText === true){
   book.users.push(newUser);
   data = {
     "users": book.users
+  }} else if (likeButtonText === false){
+    book.users.splice(-1);
+    data = {
+      "users": book.users
+    }
   }
   fetch(`http://localhost:3000/books/${bookId}`, {
     method: "PATCH",
@@ -67,5 +81,4 @@ function likeBook(event, book){
     .then(data => {
       getBook(event, data);
     })
-
 }
